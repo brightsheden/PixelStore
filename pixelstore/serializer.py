@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
     isAdmin = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = User 
-        fields = ['id',"_id",'username','name', 'email',"isAdmin"]
+        fields = ['id',"_id",'username','name', 'email',"isAdmin","wallet"]
 
     def get_name(self,obj):
         name= obj.first_name

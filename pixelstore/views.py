@@ -257,6 +257,11 @@ def updateTemplate(request,pk):
     data = request.data
     template = Template.objects.get(_id=pk)
     
+    if template.is_paid == False and data['is_paid'] == True:
+        #######Fund Wallet here
+        template.user.deposite(template.user.id,template.price)
+
+
     template.title = data['title']
     template.category = data['category']
     template.price = data['price']
