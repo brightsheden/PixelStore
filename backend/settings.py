@@ -10,10 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 import os
-import django_heroku
-import dj_database_url
+# import django_heroku
+# import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '*mtsj-211fv7r80lgopjp6j(s&hljs&l_ljy1n(wb1%2ua_qm8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -44,16 +45,15 @@ INSTALLED_APPS = [
     'corsheaders',
     'pixelstore.apps.PixelstoreConfig',
     'cloudinary_storage',
-    #'django_extensions',
+    # 'django_extensions',
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES' : [
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication'
     ]
 }
 
-from datetime import timedelta
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
@@ -83,9 +83,8 @@ SIMPLE_JWT = {
 }
 
 
-
 MIDDLEWARE = [
-    
+
     'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 
@@ -101,10 +100,10 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    
+
 
     "http://localhost:3000",
-    
+
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -180,10 +179,10 @@ MEDIA_URL = '/images/'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-   # BASE_DIR / 'frontend/build/static'
+    # BASE_DIR / 'frontend/build/static'
 ]
 
 MEDIA_ROOT = 'static/images'
 
-if os.getcwd() == '/App':
-    DEBUG= False
+# if os.getcwd() == '/App':
+#     DEBUG = False
