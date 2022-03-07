@@ -1,15 +1,20 @@
 
+from decimal import Decimal
+
+import profile
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
 from rest_framework import status
+from rest_framework.serializers import Serializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.core.paginator import Paginator,PageNotAnInteger,EmptyPage
 from .serializer import *
 from django.contrib.auth.models import User
-from datetime import datetime
+from datetime import date, datetime
+from django.db.models import Q
 
 # Create your views here.
 #user and jwt auth
@@ -59,7 +64,6 @@ def getUserProfile(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserById(request,pk):
-    
     user = User.objects.get(id=pk)
     serializer = UserSerializer(user, many=False)
     return Response(serializer.data)
@@ -91,6 +95,7 @@ def updateUser(request, pk):
     user.username = data['email']
     user.email = data['email']
     user.is_staff = data['isAdmin']
+   
 
     user.save()
 
@@ -100,6 +105,7 @@ def updateUser(request, pk):
 
 
 #create user more Details
+#remind me , i will later use signal for this
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def createProfileMoreDetails(request):
@@ -116,6 +122,7 @@ def createProfileMoreDetails(request):
     return Response(serializer.data)
 
 #upload profile photo
+'''
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def profilePhoto(request):
@@ -126,26 +133,136 @@ def profilePhoto(request):
     profile.photo = request.FILES.get('image')
     profile.save()
     return Response("image was Uploaded")
+'''
+
+
+
+#upload profile photo
+@api_view(['POST'])
+#@permission_classes([IsAuthenticated])
+def profilePhoto(request):
+    data = request.data
+    user_id = data['user_id']
+    profile = Profile.objects.get(_id=user_id )
+    profile.photo = request.FILES.get('image')
+    profile.save()
+    return Response("image was Uploaded")
     
+
 
 
 # get profilemoredetails 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getProfileMoreDetails(request):
+
     user = request.user
-    profiles = user.profile_set.all()
+    profiles = user.profile
+    #print(profiles)
+    serializer = ProfileSerializer(profiles, many=False)
+    print(serializer.data)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def getProfiles(request):
+    profiles = Profile.objects.all()
+
+   
     serializer = ProfileSerializer(profiles, many=True)
     return Response(serializer.data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserMoreProfileById(request,pk):
     
-    profile = Profile.objects.get(id=pk)
-    serializer = UserSerializer(profile, many=False)
+    profile = Profile.objects.get(_id=pk)
+    serializer = ProfileSerializer(profile, many=False)
     return Response(serializer.data)
 
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def updateProfiles(request,pk):
+    data = request.data 
+    profile = Profile.objects.get(_id=pk)
+    profile.nickname = data['nickname']
+    profile.name = data['name']
+    profile.country = data['country']
+    profile.occupation = data['occupation']
+    profile.wallet = Decimal(data['wallet'])
+    profile.isSeller = Decimal(data['isSeller'])
+    profile.isStaff = Decimal(data['isStaff'])
+    profile.save()
+    serializer = ProfileSerializer(profile, many=False)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def updateProfileWallet(request,pk):
+    data = request.data 
+    profile = Profile.objects.get(_id=pk)
+    profile.wallet =profile.wallet + Decimal(data['wallet'])
+    #profile.wallet += profile.wallet
+    profile.save()
+    serializer = ProfileSerializer(profile, many=False)
+    return Response(serializer.data)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def updateProfilesUser(request,pk):
+    data = request.data 
+    profile = Profile.objects.get(_id=pk)
+    profile.nickname = data['nickname']
+    profile.name = data['name']
+    profile.country = data['country']
+    profile.occupation = data['occupation']
+    #profile.photo = data['photo']
+   
+    profile.save()
+    serializer = ProfileSerializer(profile, many=False)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def updateProfileWallet(request,pk):
+    data = request.data 
+    profile = Profile.objects.get(_id=pk)
+    profile.wallet =profile.wallet + Decimal(data['wallet'])
+    #profile.wallet += profile.wallet
+    profile.save()
+    serializer = ProfileSerializer(profile, many=False)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def decreaseProfileWallet(request,pk):
+    data = request.data 
+    profile = Profile.objects.get(_id=pk)
+    profile.wallet =profile.wallet - Decimal(data['amount'])
+    #profile.wallet += profile.wallet
+    profile.save()
+    serializer = ProfileSerializer(profile, many=False)
+    return Response(serializer.data)
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def DeleteProfile(request,pk):
+    profile = Profile.objects.get(_id=pk)
+    profile.delete()
+    return Response("profile deleted")
+
+#api_view(['PUT'])
+
+#dummy update wallet function
+def updateW(request,pk):
+    data = request.data
+    profile = Profile.objects.get(id=pk)
+    template = Template.objects.get(id=pk)
+    if template.is_purchased == True and template.paidAt == datetime.now():
+        profile.wallet += template.price
+    return Response("balance updated")
 
 #update userProfile
 @api_view(['PUT'])
@@ -169,9 +286,29 @@ def updateUserProfile(request):
 
 @api_view(["GET"])
 def getTemplates(request):
-    templates = Template.objects.all()
+    query = request.query_params.get('keyword')
+    if query == None:
+        query= ''
+    templates = Template.objects.filter(
+       Q(title__icontains=query) | Q(category__icontains=query)
+       ).order_by('-createdAt')
+    #templates = Template.objects.all()
+    page =request.query_params.get('page')
+    paginator = Paginator(templates, 5)
+
+    try:
+        templates = paginator.page(page)
+    except PageNotAnInteger:
+        templates = paginator.page(1)
+    except EmptyPage:
+        templates = paginator.page(paginator.num_pages)
+
+    if page  == None:
+        page =1
+    
+    page = int(page)
     serializer = TemplateSerializer(templates, many=True)
-    return Response(serializer.data)
+    return Response({'templates':serializer.data, 'page': page, 'pages': paginator.num_pages})
 
 
 @api_view(["GET"])
@@ -182,11 +319,14 @@ def getTemplate(request, pk):
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def createTemplate(request):
     user = request.user
+    #profile = Profile.objects.filter(template=user),
     template=Template.objects.create(
         user = user,
+        profile = user.profile,
+        creator = user.username,
         title = "sample title",
         price = 0,
         category = "sample category",
@@ -252,16 +392,13 @@ def uploadScreenshot3(request):
 
 #update_template
 @api_view(["PUT"])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def updateTemplate(request,pk):
     data = request.data
     template = Template.objects.get(_id=pk)
-    
-    if template.is_paid == False and data['is_paid'] == True:
-        #######Fund Wallet here
-        template.user.deposite(template.user.id,template.price)
+  
 
-
+    template.is_paid = data["is_paid"]
     template.title = data['title']
     template.category = data['category']
     template.price = data['price']
@@ -273,19 +410,31 @@ def updateTemplate(request,pk):
     return Response(serializer.data)
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def DeleteTemplate(request,pk):
     template = Template.objects.get(_id=pk)
     template.delete()
     return Response("template deleted")
 
+@api_view(['GET'])
+def getTopRatedTemplate(request):
+    templates = Template.objects.filter(rating__gte=10).order_by('-rating')[0:5]
+    serializer = TemplateSerializer(templates,many=True)
+    return Response(serializer.data)
 
 
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def updateTemplateToPaid(request, pk):
+    data = request.data
     template = Template.objects.get(_id=pk)
+      
+    #if template.is_purchased == False and data['is_purchased '] == True:
+        #######Fund Wallet here
+      #  template.user.deposite(template.user.id,template.price)
+
+        
 
     template.is_purchased = True
     template.paidAt = datetime.now()
@@ -293,73 +442,98 @@ def updateTemplateToPaid(request, pk):
 
     return Response('template was paid')
 
-#get_all_withdrawals
+#withdrawals
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def createWithdrawal(request):
+    data = request.data
+    user = request.user
+    
+       
+    withdarwal = Withdrawal.objects.create(
+        user = user,
+        profile = user.profile,
+        name = user.email,
+        amount = data['amount'],
+        accountName = data['accountName'],
+        accountBank_Name =  data['accountBank_Name'],
+        accountBank_Number = data['accountBank_Number'],
+        payPalId = data['payPalId']
+        )
+   
+    serializer = WithdrawalSerializer(withdarwal, many=False)
+    return Response(serializer.data)
+
+
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def getWithdrawals(request):
-    withdrawal = Withdrawal.objects.all()   
-    serializer = WalletsSerializer( withdrawal, many=True)
+    withdrawal = Withdrawal.objects.all().order_by('-createdAt')   
+    serializer = WithdrawalSerializer( withdrawal, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getWithdrawalByid(request,pk):
+    withdrawal = Withdrawal.objects.get(_id=pk)   
+    serializer = WithdrawalSerializer( withdrawal, many=False)
     return Response(serializer.data)
 
 #update_withdrawal_details
-api_view(['PUT'])
+@api_view(["PUT"])
+@permission_classes([IsAdminUser])
 def updateWithdrawal(request, pk):
     data = request.data
     withdrawal = Withdrawal.objects.get(_id=pk)
-    withdrawal.accountName= data['accountName']
-    withdrawal.accountBank_Name= data['accountBank_Name']
-    withdrawal.accountBank_Number= data['accountBank_Number']
+    withdrawal.amount = data['amount']
+    withdrawal.name = data['name']
+    withdrawal.accountName = data['accountName']
+    withdrawal.accountBank_Name = data['accountBank_Name']
+    withdrawal.accountBank_Number = data['accountBank_Number']
+    withdrawal.payPalId = data['payPalId']
+    withdrawal.is_success = data['is_success']
     withdrawal.save()
 
-    serializer = WalletsSerializer(Withdrawal, many=False)
+    serializer = WithdrawalSerializer(withdrawal, many=False)
     return Response(serializer.data)
 
-    
-#My_wallet
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def getMyWallet(request):
+def getMyWithdrawals(request):
     user = request.user
-    wallet = user.wallets_set.all()
-    serializer = WalletsSerializer(wallet, many=True)
-    return Response(serializer.data)
-    
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def getWalletbyId(request, pk):
-    user = request.user
-    wallet = Wallets.objects.get(_id=pk)
-    serializer = WalletsSerializer(wallet, many=False)
+    withdrawal = user.withdrawal_set.all().order_by('-createdAt')
+    serializer = WithdrawalSerializer(withdrawal, many=True)
     return Response(serializer.data)
 
-'''
-def mybalance(request):
-    user = request.user
-    balance = user.balance_set.all()
-    serializer = BalanceSerializer(balance, many=False)
-    return Response(serializer.data)
-    '''
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getMyTemplates(request):
     user = request.user
-    template = user.template_set.all()
+    template = user.template_set.all().order_by('-createdAt')
     serializer = TemplateSerializer(template, many=True)
     return Response(serializer.data)
 
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def deleteWithdrawal(request,pk):
+    withdrawal = Withdrawal.objects.get(_id=pk)
+    withdrawal.delete()
+    return Response("delete successful")
 
-@api_view(['PUT'])
-@permission_classes([IsAuthenticated])    
-def Deposite(request,pk ):
-    #user = request.user
-    data = request.data
-    wallet = Wallets.objects.get(_id=pk)
-    wallet.amount = data['amount'] 
-    wallet.save()
+
+
     
-    return Response("balanceChanged")
+
+
+
+
+
+
+
 
 
 
@@ -409,4 +583,171 @@ def createTemplateReviews(request, pk):
         return Response('Review Added')
 
 
+
+
+
+
         
+#GetBlog
+@api_view(["GET"])
+def getBlog(request):
+    blog = Blog.objects.all().order_by('-createdAt')
+    serializer = BlogSerializer(blog, many=True)
+    return Response(serializer.data)
+
+#getblog id
+@api_view(["GET"])
+def getBlogByid(request, pk):
+    blog= Blog.objects.get(_id=pk)
+    serializer = BlogSerializer(blog, many=False)
+    return Response(serializer.data)
+
+
+#Blog
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def createBlogPost(request):
+    user = request.user
+    data = request.data
+    blogPost=Blog.objects.create(
+        user = user,
+        author = user.username,
+        title = "sample title",
+        body = "sample body text",
+        category = "sample category"
+        #thunmbnail = "sample description"
+    )
+    serializer = BlogSerializer(blogPost, many=False)
+    return Response (serializer.data)
+
+#upload thumbnail
+@api_view(['POST'])
+#@permission_classes([IsAuthenticated])
+def uploadBlogThumbnail(request):
+    data = request.data
+    
+    blog_id=data['blog_id']
+    blog =  Blog.objects.get(_id=blog_id)
+    blog.thumbnail = request.FILES.get('image')
+    blog.save()
+    return Response("image was uploaded")
+
+
+#update_blog
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def updateBlog(request,pk):
+    data = request.data
+    blog = Blog.objects.get(_id=pk)
+    
+    blog.title = data['title']
+    blog.category = data['category']
+    blog.body = data['description']
+  
+  
+
+    blog.save()
+    serializer = BlogSerializer(blog,many=False)
+    return Response(serializer.data)
+
+#DELETE Blog
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def DeleteBlog(request,pk):
+    blog = Blog.objects.get(_id=pk)
+    blog.delete()
+    return Response("blog post deleted")
+
+#blog reviews
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def createBlogReviews(request, pk):
+    
+    blog = Blog.objects.get(_id=pk)
+    data = request.data
+    user = request.user
+
+   
+    # 2 - No Rating or 0
+  
+    # 3 - Create review
+    
+    review = ReviewBlog.objects.create(
+        
+        blog=blog,
+        name=user.username,
+        comment=data['comment'],
+    )
+
+    reviews = blog.reviewblog_set.all()
+    #template.numReviews = len(reviews)
+
+    #total = 0
+    #for i in reviews:
+        # total += i.rating
+
+    #template.rating = total / len(reviews)
+    blog.save()
+
+    return Response('Review Added')
+
+
+#sellerform start here
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def createSellerForm(request):
+    data = request.data
+    user = request.user
+    
+       
+    seller = SellerForm.objects.create(
+        user = user,
+        profile = user.profile,
+        email = user.email,
+        username =user.username,
+        amount = '5.00',
+        isPaid = False,
+        
+     
+        ) 
+   
+    serializer = SellerFormSerializer(seller, many=False)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def getAllSellerForm(request):
+    seller = SellerForm.objects.all().order_by('-createdAt')
+    serializer = SellerFormSerializer(seller, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getAllSellerFormById(request,pk):
+    seller = SellerForm.objects.get(_id=pk)
+    serializer = SellerFormSerializer(seller, many=False)
+    return Response(serializer.data)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def updateSellerToPaid(request,pk):
+    seller = SellerForm.objects.get(_id=pk)
+    seller.isPaid = True
+    seller.paidAt = datetime.now()
+    seller.save()
+    #serializer = SellerFormSerializer(seller, many=False)
+    return Response("seller paid")
+
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def DeleteSellerForm(request,pk):
+    seller = SellerForm.objects.get(_id=pk)
+    seller.delete()
+    return Response("blog post deleted")
+
+

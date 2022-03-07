@@ -8,6 +8,7 @@ import { register } from '../Actions/userAction';
 import FormContainer from '../Components/FormContainer';
 import Message from '../Components/Message';
 import Loader from '../Components/Loader';
+import Helmet from 'react-helmet';
 
 
 
@@ -49,6 +50,9 @@ function RegisterScreen({location,history}) {
 
     return (
         <FormContainer>
+            <Helmet>
+                <title>Register</title>
+            </Helmet>
 
            
         <h1>Register</h1>

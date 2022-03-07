@@ -17,6 +17,7 @@ function UserEditScreen({ match, history }) {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [isAdmin, setIsAdmin] = useState(false)
+  
 
     const dispatch = useDispatch()
 
@@ -38,6 +39,7 @@ function UserEditScreen({ match, history }) {
                 setName(user.name)
                 setEmail(user.email)
                 setIsAdmin(user.isAdmin)
+      
         
         }
         }
@@ -102,6 +104,8 @@ function UserEditScreen({ match, history }) {
                                 >
                                 </Form.Check>
                             </Form.Group>
+
+                           
 
                             <Button type='submit' variant='primary'>
                                 Update

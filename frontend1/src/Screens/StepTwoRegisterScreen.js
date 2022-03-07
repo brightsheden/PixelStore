@@ -23,6 +23,8 @@ function StepTwoRegisterScreen({location,history}) {
     const {userInfo} = userLogin
     const userRegisterTwo = useSelector(state => state.userRegisterTwo)
     const {loading,error,userInfoTwo} = userRegisterTwo
+
+    
     React.useEffect(()=>{
         if (!userInfo){
             history.push('/')

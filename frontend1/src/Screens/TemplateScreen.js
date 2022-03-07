@@ -14,6 +14,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { createTemplateReview } from '../Actions/templateAction';
 import { REVIEW_TEMPLATE_RESET } from '../Constants/templateConstant';
 import axios from 'axios'
+import Helmet from 'react-helmet';
 
 //import { PRODUCT_CREATE_REVIEW_RESET } from '../constants/productConstants';
 
@@ -47,6 +48,8 @@ function TemplateScreen({match,history}) {
       
    },[dispatch,match,successReview])
 
+ 
+
 
 
    
@@ -76,6 +79,7 @@ console.log(res);}).catch(err=>{
 })
 }
 
+
    
 
     
@@ -83,6 +87,15 @@ console.log(res);}).catch(err=>{
     
     return (
         <div>
+                <Helmet>
+                    
+                <title>{template.title}</title>
+                <meta name='description' content={template.description} />
+                <meta  property="og:title" content={template.title} data-rh="true"/>
+                <meta  property="og:description" content={template.description} data-rh="true"/>
+                <meta  property="og:image" content={template.thumbnail} data-rh="true"/>
+            </Helmet>
+
             <Link to='/' className="btn btn-light my-3">Go Back</Link>
             {loading ? <Loader/> 
                 : error ? <Message variant="danger">{error}</Message> : (
@@ -104,6 +117,14 @@ console.log(res);}).catch(err=>{
 
                         <ListGroup.Item>
                             <Rating value={template.rating} text={`${template.numReviews} reviews`} color={'#f8e825'}/>
+                        </ListGroup.Item>
+
+                        <ListGroup.Item>
+                            Category: {template.category}
+                        </ListGroup.Item>
+
+                        <ListGroup.Item>
+                            Creator: {template.creator}
                         </ListGroup.Item>
 
                         <ListGroup.Item>

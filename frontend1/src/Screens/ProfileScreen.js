@@ -1,17 +1,18 @@
 // @flow strict
 
 import React, { useState, useEffect } from 'react'
-import { Form, Button, Row, Col, Table,Card,Modal } from 'react-bootstrap'
+import { Form, Button, Row, Col, Table,Card,Modal, Image } from 'react-bootstrap'
 import { LinkContainer } from 'react-router-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import Loader from '../Components/Loader'
 import Message from '../Components/Message'
 import { Link } from 'react-router-dom'
 import {  FaCheck, FaEdit, FaPlus, FaTrash} from 'react-icons/fa'
-import { getUserDetails, registerTwoDetails, walletuser } from '../Actions/userAction'
+import { getUserDetails, registerTwoDetails } from '../Actions/userAction'
 import { listMyTemplates,createTemplates, templateDelete } from '../Actions/templateAction'
 import { CREATE_TEMPLATE_RESET } from '../Constants/templateConstant'
-import Earnings from '../Components/Earnings'
+import Helmet from 'react-helmet'
+
 
 
 
@@ -24,8 +25,7 @@ function Profilescreen({history}) {
     const userLogin = useSelector(state => state.userLogin )
     const {userInfo} = userLogin
     
-    const userProfileMore = useSelector(state => state.userProfileMore)
-    const {profiles} = userProfileMore
+    
  
     const myTemplate = useSelector(state => state.myTemplate)
     const {loading:loadingMytemplate, error: errorMytemplate, templates} = myTemplate
@@ -41,14 +41,9 @@ function Profilescreen({history}) {
     const deleteTemplate = useSelector(state => state.deleteTemplate)
     const {loading:loadingDelete, error:errorDelete, success:successDelete,} = deleteTemplate
 
+    const userProfile = useSelector(state => state.userProfileMore)
+    const {profiles, loading, error, } = userProfile
 
-    const userWallet= useSelector(state => state.userWallet)
-    const {loading:loadingWallet, error:erroWallet, success:successWallet,wallets } = userWallet
-
-
-   
-
-   // const {earnings, setEarings} = useState(0)
 
 
     const dispatch = useDispatch()
@@ -66,30 +61,29 @@ function Profilescreen({history}) {
     }
     else{
         dispatch( listMyTemplates())
-        dispatch( walletuser())
-        dispatch(registerTwoDetails ())
+       
+        
+        
         if (!user || !user.name || userInfo.name !== user.name  ) {
             dispatch(getUserDetails('profile'))
-            
-          
-            
-           
-    
-            
+            dispatch(registerTwoDetails ())
+  
         } 
         
        
        }
+
      
-   },[userInfo,dispatch,history,successCreateTemplate,createdTemplate,successUpdate,successDelete])
+   },[userInfo,dispatch,history,successCreateTemplate,createdTemplate,successUpdate,successDelete,])
 
   
    const deleteHandler= (id)=>{
-    
-     dispatch(templateDelete(id))
-     setShow(false)
-    
-  console.log("deleted")
+       
+    if (window.confirm('Are you sure you want to delete this template?')) {
+        dispatch(templateDelete(id))
+    }
+ 
+   
    }
 
    
@@ -116,6 +110,9 @@ function Profilescreen({history}) {
     return (
         
         <div>
+            <Helmet>
+                <title>My Profile</title>
+            </Helmet>
             
           
             <Row>
@@ -123,19 +120,33 @@ function Profilescreen({history}) {
             <Col>
              <h2>MY PROFILE</h2>
               <Card className="my-3 p-3 rounded">
+              {loading  && (<Loader/>)}
                   <Card.Body >
                       <Card.Title>
                           USERNAME:
-                          <h3>{user.name}</h3>
+                          <h3>{userInfo?.name}</h3>
+                          </Card.Title>
+                          
+                          
+                     
+                      <Card.Title>
+                      Wallet:
+                      <h4>${profiles?.wallet}</h4>
                       </Card.Title>
 
                       <Card.Title>
-                        EARNINGS:{wallets?.map(wallet => (
-                            <span key={wallet._id}><p>#{wallet.amount}</p></span>
-                        ))}
-                      
+                      country:
+                      <h4>{profiles?.country}</h4>
                       </Card.Title>
 
+                      <Card.Title>
+                      nickname:
+                      <h4>{profiles?.nickname}</h4>
+                      </Card.Title>
+
+
+                      
+                   
                   </Card.Body>
 
               </Card>
@@ -146,7 +157,7 @@ function Profilescreen({history}) {
                     <h1>My Templates</h1>
                 </Col>
                 
-            {userInfo.isAdmin && ( <Col className='text-right'>
+            {profiles?.isSeller && ( <Col className='text-right'>
                     <Button className='my-3' onClick={createTemplateHandler}>
                         <FaPlus/> Create Template
                     </Button>
@@ -154,7 +165,7 @@ function Profilescreen({history}) {
               
             </Row>
             {loadingMytemplate && (<Loader/>)}
-            {userInfo.isAdmin && (  <div>
+            {profiles?.isSeller && (  <div>
                 <Table striped bordered hover responsive className='table-sm'>
                                 <thead>
                                     <tr>
@@ -176,7 +187,7 @@ function Profilescreen({history}) {
                                          <td>{template._id}</td>
                                          
                                          <td>{template.title}</td>
-                                         <td><img src={template.thumbnail} style={{
+                                         <td><Image src={template.thumbnail} style={{
                                              width: '50px',
                                              height: '50px'
                                          }} /></td>
@@ -196,10 +207,10 @@ function Profilescreen({history}) {
                                                  </Button>
                                              </LinkContainer>
 
-                                             <Button variant='danger' className='btn-sm' onClick={handleShow}>
+                                             <Button variant='danger' className='btn-sm' onClick={()=> deleteHandler(template._id)}>
                                                  <FaTrash/>
                                              </Button>
-                                                            <Modal
+                                                            {/*<Modal
                             show={show}
                             onHide={handleClose}
                             backdrop='static'
@@ -215,7 +226,7 @@ function Profilescreen({history}) {
                                     <Button variant="secondary" onClick={handleClose}>Close</Button>
                                     <Button variant='danger' className='btn-sm'onClick={()=> deleteHandler(template._id)} >Delete</Button>
                                 </Modal.Footer>
-                            </Modal>
+                            </Modal>*/}
            
                                            
                                          </td>

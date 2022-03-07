@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
-# import django_heroku
-# import dj_database_url
+import django_heroku
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,10 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '*mtsj-211fv7r80lgopjp6j(s&hljs&l_ljy1n(wb1%2ua_qm8'
+SECRET_KEY = os.environ.get("DJANGO_PIXELSTORE_SKEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -111,7 +111,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [ os.path.join(BASE_DIR,'frontend1/build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -156,6 +156,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#import dj_database_url
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -177,12 +182,28 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/images/'
 
+
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfile')
+django_heroku.settings(locals())
+
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    # BASE_DIR / 'frontend/build/static'
+    BASE_DIR / 'frontend1/build/static'
 ]
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_ROOT = 'static/images'
+STATIC_ROOT = BASE_DIR / 'staticfile'
 
-# if os.getcwd() == '/App':
-#     DEBUG = False
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME':  os.environ.get("CLOUD_NAME"),
+    'API_KEY':  os.environ.get("API_KEY"),
+    'API_SECRET':  os.environ.get("API_SECRET")
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
+if os.getcwd() == '/App':
+    DEBUG = False
+ 

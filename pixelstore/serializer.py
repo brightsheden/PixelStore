@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
     isAdmin = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = User 
-        fields = ['id',"_id",'username','name', 'email',"isAdmin","wallet"]
+        fields = ['id',"_id",'username','name', 'email',"isAdmin",]
 
     def get_name(self,obj):
         name= obj.first_name
@@ -67,9 +67,25 @@ class WalletsSerializer(serializers.ModelSerializer):
         model = Wallets
         fields = "__all__"
 
-'''
-class BalanceSerializer(serializers.ModelSerializer):
+
+class BlogSerializer(serializers.ModelSerializer):
+    reviews = serializers.SerializerMethodField(read_only=True)
     class Meta:
-        model = Balance
+        model = Blog
+        fields ="__all__"
+
+    def get_reviews(self,obj):
+        reviews= obj.reviewblog_set.all()
+        serializer = ReviewBlogSerializer(reviews, many=True)
+        return serializer.data
+
+
+class ReviewBlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewBlog
         fields = "__all__"
-        '''
+
+class SellerFormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SellerForm
+        fields = "__all__"        

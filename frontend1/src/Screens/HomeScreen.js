@@ -8,27 +8,36 @@ import {LinkContainer} from 'react-router-bootstrap'
 
 //import { Link } from "react-router-dom";
 import { listTemplates } from '../Actions/templateAction';
-import Templates from '../Components/Template';
+import Template from '../Components/Template';
 import Loader from '../Components/Loader';
 import Message  from '../Components/Message';
+import Parginate from '../Components/Parginate';
+import TemplateCarousel from '../Components/TemplateCarosel';
+import { registerTwoDetails } from '../Actions/userAction';
+import SearchBox from '../Components/searchBox';
 
 
 
 
 
-function HomeScreen() {
+function HomeScreen({history}) {
 
     const  dispatch = useDispatch()
-    const templateList = useSelector(state => state.templateList)
-    const {error,loading,templates,} = templateList
 
+    const templateList = useSelector(state => state.templateList)
+    const {error,loading,page,pages,templates} = templateList
+
+
+    let keyword = history.location.search
+    
     useEffect(()=>{
-        dispatch(listTemplates())
+        dispatch(listTemplates(keyword))
+        
         
        
  
 
-    },[dispatch])
+    },[dispatch,keyword])
   
     
     return (
@@ -37,20 +46,24 @@ function HomeScreen() {
        
             
         <div>
+            <SearchBox/>
+             {!keyword && <TemplateCarousel/>}
+             
         
         
-        <h1>latest Templates</h1>
+        <h1>Latest Templates</h1>
         {loading ? <Loader/> :
         error ? <Message variant='danger'>{error}</Message>:
     <div>
         <Row>
             {templates.map(template => (
             <Col key={template._id} sm={12} md={6} lg={4} xl={3}>
-                <Templates template={template}/>
+                <Template template={template}/>
             </Col>
             ))}
     
         </Row>
+        <Parginate page={page} pages={pages} keyword={keyword}/>
        
     </div>
          }

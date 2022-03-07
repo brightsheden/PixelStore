@@ -38,8 +38,12 @@ function UserListScreen({history}) {
    
 
     const deleteHandler= (id)=>{
+
+        if (window.confirm('Are you sure you want to delete this user?')) {
             dispatch(deleteUsers(id))
-            setShow(false)
+        }
+            
+      
         
     }
 
@@ -80,10 +84,10 @@ function UserListScreen({history}) {
                                             <FaEdit/>
                                         </Button>
                                     </LinkContainer>
-                                    <Button variant="danger" onClick={()=> handleShow()}>
+                                    <Button variant="danger" onClick={()=> deleteHandler(user._id)} >
                                             <FaTrash/>
                                         </Button>
-                                        <Modal
+                                       { /*<Modal
                                                 show={show}
                                                 onHide={handleClose}
                                                 backdrop='static'
@@ -99,7 +103,7 @@ function UserListScreen({history}) {
                                                         <Button variant="secondary" onClick={handleClose}>Close</Button>
                                                         <Button variant='danger' className='btn-sm'onClick={()=> deleteHandler(user._id)} >Delete</Button>
                                                     </Modal.Footer>
-                                                </Modal>
+                                       </Modal>*/}
                                 </td>
                                 
                             </tr>

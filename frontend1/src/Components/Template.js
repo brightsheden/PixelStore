@@ -24,6 +24,8 @@ function Templates({template}) {
                 <div className="my-3">
                     
                     <Rating value={template.rating} text={`${template.numReviews} reviews`} color={'#f8e825'}/>
+                    <p><strong>Category: </strong>{template.category}</p>
+                   
                 </div>
 
             </Card.Text>
@@ -32,7 +34,7 @@ function Templates({template}) {
                 ${template.price}
             </Card.Text>
 ): <Card.Text as='h3'>
-$0.00
+Free
 </Card.Text> }
            
         </Card.Body>

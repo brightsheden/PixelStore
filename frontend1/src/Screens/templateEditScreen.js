@@ -270,17 +270,24 @@ function TemplateEditScreen({match, history}) {
                                  {uploading && <Loader/> }
                             </Form.Group>
 
-                            <Form.Group controlId='category'>
-                                <Form.Label>category</Form.Label>
+                            <Form.Group controlId="category">
+                                <Form.Label>Category</Form.Label>
                                 <Form.Control
-
-                                    type='text'
-                                    placeholder='category'
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
+                                as="select"
+                                value={category}
+                                onChange={(e)=>setCategory(e.target.value)}
                                 >
+                                    <option value="" >Select  Category</option>
+                                    <option value="Banner" >Banner</option>
+                                    <option value="Fliers" >Fliers</option>
+                                    <option value="Cards" >Cards</option>
+                                    <option value="Logos" >Logos</option>
+                                    <option value="Social media design " >Social Media Design</option>
+                                    <option value="Birthday " >Birthday Design</option>
+                                    <option value="wedding " >Wedding Design</option>
+                               
                                 </Form.Control>
-                            </Form.Group>
+                                </Form.Group>
 
                            
 

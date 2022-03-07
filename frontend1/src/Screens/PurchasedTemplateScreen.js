@@ -77,7 +77,7 @@ function PurchasedTemplateScreen({match,history}) {
             'flush'>
                 <ListGroup.Item>
                     <Row>
-                        <h1>{Earnings}</h1>
+                     
                         <Col   >
                             <Image src={purchaseTemplate.thumbnail} alt={purchaseTemplate.tittle} fluid rounded/>
                             

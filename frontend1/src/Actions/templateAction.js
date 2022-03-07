@@ -50,16 +50,19 @@ import { TEMPLATE_LIST_REQUEST,
     DOWNLOAD_TEMPLATE_REQUEST,
     DOWNLOAD_TEMPLATE_SUCCESS,
     DOWNLOAD_TEMPLATE_RESET,
+    TEMPLATES_TOP_REQUEST,
+    TEMPLATES_TOP_SUCCESS,
+    TEMPLATES_TOP_FAIL,
 
  } from "../Constants/templateConstant"
 
 import axios from "axios"
 
-export const listTemplates = ()=> async (dispatch)=>{
+export const listTemplates = (keyword= '')=> async (dispatch)=>{
     try {
         dispatch({ type: TEMPLATE_LIST_REQUEST })
 
-        const { data } = await axios.get('http://127.0.0.1:8000/api/templates/')
+        const { data } = await axios.get(`/api/templates/${keyword}`)
 
         dispatch({
             type: TEMPLATE_LIST_SUCCESS,
@@ -92,7 +95,7 @@ export const listTemplateDestails = (id)=> async (dispatch,getState)=>{
          //   }
        // }
 
-        const { data } = await axios.get(`http://127.0.0.1:8000/api/template/${id}`,)
+        const { data } = await axios.get(`/api/template/${id}`,)
 
         dispatch({
             type: TEMPLATE_DETAILS_SUCCESS,
@@ -269,7 +272,7 @@ export const purchaseTemplate = (id)=> async (dispatch,getState)=>{
          //   }
        // }
 
-        const { data } = await axios.get(`http://127.0.0.1:8000/api/template/${id}`,)
+        const { data } = await axios.get(`/api/template/${id}`,)
 
         dispatch({
             type: TEMPLATE_PURCHASE_SUCCESS,
@@ -287,7 +290,7 @@ export const purchaseTemplate = (id)=> async (dispatch,getState)=>{
 }
 
 
-export const payTemplate = (templatePurchase) => async (dispatch, getState) => {
+export const payTemplate = (id,paymentResult) => async (dispatch, getState) => {
     try {
         dispatch({
             type:  PAY_TEMPLATE_REQUEST
@@ -305,7 +308,7 @@ export const payTemplate = (templatePurchase) => async (dispatch, getState) => {
         }
 
         const { data } = await axios.put(
-            `/api/${templatePurchase._id}/template/pay/`,
+            `/api/${id}/template/pay/`,
             {},
             config
         )
@@ -342,7 +345,7 @@ export const paidTemplate = (id)=> async (dispatch,getState)=>{
             }
         }
 
-        const { data } = await axios.get(`http://127.0.0.1:8000/api/template/${id}`,config)
+        const { data } = await axios.get(`/api/template/${id}`,config)
 
         dispatch({
             type:  PAID_TEMPLATE_SUCCESS,
@@ -398,4 +401,35 @@ export const createTemplateReview = (templateId,review) => async (dispatch, getS
         })
     }
 }
+
+
+export const listTopTemplate = () => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: TEMPLATES_TOP_REQUEST
+        })
+
+      
+
+        const { data } = await axios.get(
+            `/api/templates/top/rated/`,
+        )
+        dispatch({
+            type: TEMPLATES_TOP_SUCCESS,
+            payload: data,
+        })
+
+
+       
+
+    } catch (error) {
+        dispatch({
+            type: TEMPLATES_TOP_FAIL,
+            payload: error.response && error.response.data.detail
+                ? error.response.data.detail
+                : error.message,
+        })
+    }
+}
+
 

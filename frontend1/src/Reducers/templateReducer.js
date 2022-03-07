@@ -44,6 +44,9 @@ import { TEMPLATE_LIST_REQUEST,
     REVIEW_TEMPLATE_REQUEST,
     REVIEW_TEMPLATE_SUCCESS,
     REVIEW_TEMPLATE_RESET,
+    TEMPLATES_TOP_REQUEST,
+    TEMPLATES_TOP_SUCCESS,
+    TEMPLATES_TOP_FAIL,
 
  
  } from "../Constants/templateConstant"
@@ -55,7 +58,9 @@ export const templatesListReducer = (state= {templates : []}, action)=>{
             
         case TEMPLATE_LIST_SUCCESS:
             return {loading: false,
-                 templates:action.payload
+                templates:action.payload.templates, 
+                page:action.payload.page, 
+                pages:action.payload.pages
             }
 
         case TEMPLATE_LIST_FAIL:
@@ -110,11 +115,12 @@ export const templateCreateReducer = (state= {}, action)=>{
 export const templateListMyReducer = (state={templates: []}, action)=>{
     switch (action.type) {
         case MY_TEMPLATE_REQUEST:
-            return {loading: true,  }
+            return {loading: true, }
             
         case MY_TEMPLATE_SUCCESS:
             return {loading: false, 
                 templates:action.payload
+              
             }
 
         case MY_TEMPLATE_FAIL:
@@ -264,3 +270,23 @@ export const templateCreateReviewReducer = (state= { } , action)=>{
 
 }
 
+export const templateTopReducer = (state={templates: []}, action)=>{
+    switch (action.type) {
+        case TEMPLATES_TOP_REQUEST:
+            return {loading: true, }
+            
+        case TEMPLATES_TOP_SUCCESS:
+            return {loading: false, 
+                templates:action.payload
+              
+            }
+
+        case TEMPLATES_TOP_FAIL:
+            return {loading: false, error:action.payload}   
+            
+            
+       
+        default:
+            return state;
+    }
+}

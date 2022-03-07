@@ -10,6 +10,7 @@ import { login } from '../Actions/userAction';
 import FormContainer from '../Components/FormContainer';
 import Loader from '../Components/Loader';
 import Message from '../Components/Message';
+import Helmet from 'react-helmet';
 
 
 function LoginScreen({history,location}) {
@@ -36,6 +37,11 @@ function LoginScreen({history,location}) {
   
     return (
         <>
+            <Helmet>
+                <title>Sign In</title>
+                <meta name='description' content='login page || kindly login befor you can cotinue' />
+            </Helmet>
+
         {loading? <Loader/> : error? <Message variant="dander">{error}</Message>:
         (
             <FormContainer>

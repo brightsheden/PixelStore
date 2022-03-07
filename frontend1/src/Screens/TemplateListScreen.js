@@ -11,6 +11,7 @@ import Message from '../Components/Message'
 import {  FaCheck, FaEdit,  FaTrash} from 'react-icons/fa'
 //import Paginate from '../components/Paginate'
 import { listTemplates, templateDelete, } from '../Actions/templateAction'
+import Helmet from 'react-helmet'
 
 //import Parginate from '../components/Parginate'
 
@@ -50,10 +51,11 @@ function TemplateListScreen({ history, match }) {
 
     const deleteHandler = (id) => {
 
+        if (window.confirm('Are you sure you want to delete this template?')) {
+            dispatch(templateDelete(id))
+        }
       
-        dispatch(templateDelete(id))
-        setShow(false)
-        
+       
     }
 
     const [show, setShow] = useState(false)
@@ -69,6 +71,10 @@ function TemplateListScreen({ history, match }) {
 
     return (
         <div>
+            <Helmet>
+                <title>Template List</title>
+            </Helmet>
+
             <Row className='align-items-center'>
                 <Col>
                     <h1>All Templates</h1>
@@ -106,7 +112,7 @@ function TemplateListScreen({ history, match }) {
                                         <tr key={template._id}>
                                             <td>{template._id}</td>
                                             <td>{template.title}</td>
-                                            <td>{template.user}</td>
+                                            <td>{template.creator}</td>
                                             <td>${template.price}</td>
                                             <td>{template.category}</td>
                                           
@@ -119,10 +125,10 @@ function TemplateListScreen({ history, match }) {
                                                     </Button>
                                                 </LinkContainer>
 
-                                                <Button variant='danger' className='btn-sm' onClick={() => handleShow()}>
+                                                <Button variant='danger' className='btn-sm' onClick={()=> deleteHandler(template._id)}>
                                                     <FaTrash/>
                                                 </Button>
-                                                <Modal
+                                               { /*<Modal
                                                 show={show}
                                                 onHide={handleClose}
                                                 backdrop='static'
@@ -138,7 +144,7 @@ function TemplateListScreen({ history, match }) {
                                                         <Button variant="secondary" onClick={handleClose}>Close</Button>
                                                         <Button variant='danger' className='btn-sm'onClick={()=> deleteHandler(template._id)} >Delete</Button>
                                                     </Modal.Footer>
-                                                </Modal>
+                                               </Modal>*/}
                                             </td>
                                         </tr>
                                     ))}
