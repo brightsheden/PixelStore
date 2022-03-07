@@ -20,7 +20,7 @@ class Profile(models.Model):
     wallet = models.DecimalField(max_digits=7,decimal_places=2, null=True, blank=True, default=0)
     isSeller = models.BooleanField(null=True, blank=True, default=False)
     isStaff = models.BooleanField(null=True, blank=True, default=False)
-    _id = models.AutoField( blank=True, primary_key=True, editable=False)
+    _id = models.AutoField(primary_key=True, editable=False)
     
 
     def __str__(self):
