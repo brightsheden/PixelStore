@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {BrowserRouter as Router ,Route,Switch,} from 'react-router-dom'
+import {HashRouter as Router ,Route,Switch,} from 'react-router-dom'
 import Header from './Components/Header';
 import Footer from './Components/Footer';
 import {Container} from 'react-bootstrap'

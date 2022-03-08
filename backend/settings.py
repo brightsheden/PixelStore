@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get("DJANGO_PIXELSTORE_SKEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["https://plpfactory.herokuapp.com"," http://127.0.0.1"]
 
 
 # Application definition
@@ -204,6 +204,7 @@ CLOUDINARY_STORAGE = {
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
+
 if os.getcwd() == '/App':
     DEBUG = False
  
